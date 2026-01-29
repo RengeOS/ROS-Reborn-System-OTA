@@ -1,0 +1,41 @@
+name: Extract ISO and Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y wget libarchive-tools
+
+      - name: Create directories
+        run: mkdir -p iso source-iso
+
+      - name: Download ISO
+        run: wget -P source-iso https://sourceforge.net/projects/rengeos/files/RengeOS-ISO/Latest/rengeos-2026.01.29-x86_64.iso
+
+      - name: Set ISO variables
+        run: |
+          ISO_NAME=$(ls source-iso/*.iso | xargs -n1 basename)
+          BASE_NAME=${ISO_NAME%.iso}
+          TAG_NAME=${BASE_NAME}-system-ota
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Extract ISO
+        run: |
+          cd source-iso
+          bsdtar -xf *.iso -C ../iso
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.TAG_NAME }}
+          files: |
+            iso/arch/boot/x86_64/vmlinuz-*
+            iso/arch/x86_64/*
+
