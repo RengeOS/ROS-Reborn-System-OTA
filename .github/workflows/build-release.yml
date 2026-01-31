@@ -37,7 +37,7 @@ jobs:
       - name: Extract os-release from airootfs
         run: |
           mkdir -p iso/temp-mnt
-          unsquashfs -f -d iso/temp-mnt iso/arch/x86_64/airootfs.sfs
+          unsquashfs -f -no-xattrs -d iso/temp-mnt iso/arch/x86_64/airootfs.sfs
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
