@@ -13,37 +13,31 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            wget \
-            libarchive-tools \
-            squashfs-tools
+        run: sudo apt-get update && sudo apt-get install -y wget libarchive-tools squashfs-tools
 
       - name: Create directories
         run: mkdir -p iso source-iso
 
       - name: Download ISO
-        run: |
-          wget -P source-iso \
-            https://sourceforge.net/projects/rengeos/files/RengeOS-ISO/Latest/rengeos-2026.01.29-x86_64.iso
+        run: wget -P source-iso https://sourceforge.net/projects/rengeos/files/RengeOS-ISO/Latest/rengeos-2026.01.29-x86_64.iso
 
       - name: Set ISO variables
         run: |
-          ISO_NAME=$(basename source-iso/*.iso)
+          ISO_NAME=$(ls source-iso/*.iso | xargs -n1 basename)
           BASE_NAME=${ISO_NAME%.iso}
           TAG_NAME=${BASE_NAME}-system-ota
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Extract ISO
         run: |
-          bsdtar -xf source-iso/*.iso -C iso
+          cd source-iso
+          bsdtar -xf *.iso -C ../iso
+          cd ..
 
       - name: Extract os-release from airootfs
         run: |
           mkdir -p iso/temp-mnt
           unsquashfs -f -d iso/temp-mnt iso/arch/x86_64/airootfs.sfs
-          cp iso/temp-mnt/etc/os-release ./os-release
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -53,4 +47,4 @@ jobs:
           files: |
             iso/arch/boot/x86_64/vmlinuz-*
             iso/arch/x86_64/*
-            os-release
+            iso/temp-mnt/etc/os-release
