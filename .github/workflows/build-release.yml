@@ -18,8 +18,20 @@ jobs:
       - name: Create directories
         run: mkdir -p iso source-iso
 
-      - name: Download ISO
-        run: wget -P source-iso https://sourceforge.net/projects/rengeos/files/RengeOS-ISO/Latest/rengeos-2026.01.29-x86_64.iso
+      - name: Download latest ISO from GitHub Release
+        run: |
+          set -e
+
+          REPO="RengeOS/Source-ISO"
+          echo "Fetching latest release info..."
+          API_URL="https://api.github.com/repos/$REPO/releases/latest"
+
+          ISO_URL=$(curl -s $API_URL \
+            | jq -r '.assets[] | select(.name | endswith(".iso")) | .browser_download_url')
+
+          echo "ISO URL: $ISO_URL"
+          wget -P source-iso "$ISO_URL"
+
 
       - name: Set ISO variables
         run: |
