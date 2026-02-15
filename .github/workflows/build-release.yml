@@ -39,7 +39,7 @@ jobs:
           unsquashfs -f -no-xattrs -d iso/temp-mnt iso/arch/x86_64/airootfs.sfs
       - name: Fetch release notes
         run: |
-          wget -O release-notes.md https://raw.githubusercontent.com/RengeOS/Release-Notes/main/README.md
+          wget -O release-notes.md https://raw.githubusercontent.com/RengeOS/Release-Notes/main/release-notes.md
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           cat release-notes.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
